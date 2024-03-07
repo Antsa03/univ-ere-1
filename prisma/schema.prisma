@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Utilisateur {
+  matricule    String        @id @unique @db.VarChar(10)
+  photo_profil String        @default("user.png") @db.Text
+  nom          String        @db.VarChar(50)
+  prenoms      String?       @db.VarChar(50)
+  genre        String        @db.VarChar(1)
+  isAdmin      Boolean       @db.Boolean
+  telephone    String        @db.VarChar(15)
+  lieu_origine String        @db.Text
+  niveau       String        @db.VarChar(2)
+  mention      String        @db.VarChar(4)
+  parcours     String        @db.VarChar(3)
+  email        String        @unique @db.Text
+  password     String        @db.Text
+  Publication  Publication[]
+  Commentaire  Commentaire[]
+  Sujet        Sujet[]
+  Reponse      Reponse[]
+}
+
+model Publication {
+  id_pub      Int           @id @default(autoincrement())
+  description String        @db.Text
+  type        String        @db.Text
+  matricule   String        @db.VarChar(10)
+  image       String        @db.Text
+  utilisateur Utilisateur   @relation(fields: [matricule], references: [matricule], onDelete: Cascade, onUpdate: Cascade)
+  Commentaire Commentaire[]
+}
+
+model Commentaire {
+  id_commentaire Int         @id @default(autoincrement())
+  commentaire    String      @db.Text
+  id_pub         Int
+  matricule      String      @db.VarChar(10)
+  publication    Publication @relation(fields: [id_pub], references: [id_pub], onDelete: Cascade, onUpdate: Cascade)
+  utilisateur    Utilisateur @relation(fields: [matricule], references: [matricule], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model Sujet {
+  id_sujet    Int         @id @default(autoincrement())
+  titre       String      @db.Text
+  description String      @db.Text
+  matricule   String      @db.VarChar(10)
+  utilisateur Utilisateur @relation(fields: [matricule], references: [matricule], onDelete: Cascade, onUpdate: Cascade)
+
+  Reponse Reponse[]
+}
+
+model Reponse {
+  id_reponse  Int         @id @default(autoincrement())
+  contenu     String      @db.Text
+  id_sujet    Int
+  matricule   String      @db.VarChar(10)
+  sujet       Sujet       @relation(fields: [id_sujet], references: [id_sujet], onDelete: Cascade, onUpdate: Cascade)
+  utilisateur Utilisateur @relation(fields: [matricule], references: [matricule], onDelete: Cascade, onUpdate: Cascade)
+}
